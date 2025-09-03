@@ -1,36 +1,12 @@
 import uuid
-import json
+
 
 from pydantic import (
     EmailStr,
     BaseModel,
-    StringConstraints,
-    model_serializer,
-    field_validator,
     ConfigDict,
     Field,
-    model_validator,
-    RootModel,
 )
-from pydantic.json_schema import SkipJsonSchema
-from enum import Enum
-from typing import (
-    List,
-    Literal,
-    Any,
-    Generic,
-    Optional,
-    TypeVar,
-    TypedDict,
-    Type,
-)
-from typing_extensions import Annotated
-from datetime import datetime
-from app.core.config import settings
-
-
-
-
 
 
 class Token(BaseModel):
@@ -95,7 +71,3 @@ class Message(BaseModel):
 class NewPassword(BaseModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
-
-
-
-

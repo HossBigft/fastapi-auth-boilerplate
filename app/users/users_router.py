@@ -1,7 +1,7 @@
 import uuid
 
 from typing import Any
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter,  HTTPException
 from sqlalchemy import update, delete, select, func
 
 
@@ -10,7 +10,6 @@ from app.core.dependencies import (
     CurrentUser,
     SessionDep,
 )
-from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
 from app.schemas import (
     Message,
@@ -229,7 +228,7 @@ def delete_user(
     response_model=UserPublic,
 )
 def update_superuser_me(
-    *, session: SessionDep, user_in: SuperUserUpdateMe, current_user: CurrentUser
+    *, session: SessionDep, user_in: UserUpdateMe, current_user: CurrentUser
 ) -> Any:
     """
     Update own superuser.
