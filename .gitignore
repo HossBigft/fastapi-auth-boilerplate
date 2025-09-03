@@ -12,3 +12,4 @@ actions.log
 .idea
 *.log
 log
+.env
