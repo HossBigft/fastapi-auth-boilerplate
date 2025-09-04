@@ -14,7 +14,7 @@ from app.core import security
 from app.core.config import settings
 from app.core.db import engine
 from app.schemas import TokenPayload, UserPublic
-import app.db.models
+from app.db.models import User
 
 
 reusable_oauth2 = OAuth2PasswordBearer(
@@ -61,5 +61,10 @@ def get_current_user(session: SessionDep, token: TokenDep) -> UserPublic:
 CurrentUser = Annotated[UserPublic, Depends(get_current_user)]
 
 
-
+def get_current_active_superuser(current_user: CurrentUser) -> User:
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403, detail="The user doesn't have enough privileges"
+        )
+    return current_user
 

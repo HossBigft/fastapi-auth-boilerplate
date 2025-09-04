@@ -1,7 +1,7 @@
 import uuid
 
 from typing import Any
-from fastapi import APIRouter,  HTTPException
+from fastapi import APIRouter,  HTTPException, Depends
 from sqlalchemy import update, delete, select, func
 
 
@@ -9,6 +9,7 @@ from app.db import crud
 from app.core.dependencies import (
     CurrentUser,
     SessionDep,
+    get_current_active_superuser
 )
 from app.core.security import get_password_hash, verify_password
 from app.schemas import (
@@ -45,7 +46,7 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     return UsersPublic(data=users, count=count)
 
 
-@router.post("/", response_model=UserPublic)
+@router.post("/",    dependencies=[Depends(get_current_active_superuser)], response_model=UserPublic)
 def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
     """
     Create new user.
@@ -170,6 +171,7 @@ def read_user_by_id(
 
 @router.patch(
     "/{user_id}",
+        dependencies=[Depends(get_current_active_superuser)],
     response_model=UserPublic,
 )
 def update_user(
@@ -199,7 +201,7 @@ def update_user(
     return db_user
 
 
-@router.delete("/{user_id}")
+@router.delete("/{user_id}", dependencies=[Depends(get_current_active_superuser)])
 def delete_user(
     session: SessionDep, current_user: CurrentUser, user_id: uuid.UUID
 ) -> Message:
@@ -223,28 +225,4 @@ def delete_user(
     return Message(message="User deleted successfully")
 
 
-@router.patch(
-    "/superuser/me",
-    response_model=UserPublic,
-)
-def update_superuser_me(
-    *, session: SessionDep, user_in: UserUpdateMe, current_user: CurrentUser
-) -> Any:
-    """
-    Update own superuser.
-    """
 
-    if user_in.email:
-        existing_user = crud.get_user_by_email(session=session, email=user_in.email)
-        if existing_user and existing_user.id != current_user.id:
-            raise HTTPException(
-                status_code=409, detail="User with this email already exists"
-            )
-    user_data = user_in.model_dump(exclude_unset=True)
-    stmt = update(User).where(User.id == current_user.id).values(user_data)
-    session.execute(stmt)
-    session.commit()
-    updated_user = UserPublic.model_validate(
-        session.execute(select(User).where(User.id == current_user.id)).scalar()
-    )
-    return updated_user
