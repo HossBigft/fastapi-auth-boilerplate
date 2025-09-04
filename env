@@ -5,10 +5,6 @@ DOMAIN=localhost
 # To test the local Traefik config
 # DOMAIN=localhost.tiangolo.com
 
-FRONTEND_DOMAIN=example.com 
-
-# Used by the backend to generate links in emails to the frontend
-FRONTEND_HOST=http://localhost:5173
 
 # Used by the frontend for api calls
 BACKEND_HOST=http://localhost:8000
