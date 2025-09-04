@@ -41,27 +41,4 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
 RUN apt-get update && apt-get install -y locales
 
-# add support for cyrillic symbols
-RUN apt-get update && apt-get install -y locales
-RUN sed -i -e \
- 's/# ru_RU.UTF-8 UTF-8/ru_RU.UTF-8 UTF-8/' /etc/locale.gen \
- && locale-gen
-
-# avoid error suppress /bin/sh: warning: setlocale: LC_ALL: cannot change locale
-RUN sed -i 's/^\s*SendEnv LANG LC_\*/#&/' /etc/ssh/ssh_config
-
-ENV LANG ru_RU.UTF-8
-ENV LANGUAGE ru_RU:ru
-ENV LC_LANG ru_RU.UTF-8
-ENV LC_ALL ru_RU.UTF-8
-
-# keep shell english
-RUN echo "export LANG=C.UTF-8" >> /etc/profile && \
-    echo "export LANGUAGE=C.UTF-8:en" >> /etc/profile && \
-    echo "export LANG=C.UTF-8" >> ~/.bashrc && \
-    echo "export LANGUAGE=C.UTF-8:en" >> ~/.bashrc
-        
-COPY ./scripts/entrypoint.sh /entrypoint.sh
-RUN ls -l /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+CMD ["fastapi", "run", "--workers", "4", "app/main.py"]
