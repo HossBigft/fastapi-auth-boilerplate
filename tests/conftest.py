@@ -52,7 +52,7 @@ async def normal_user(db: Session) -> UserCreate:
 
 @pytest_asyncio.fixture(scope="module")
 async def normal_user_token_headers(
-    client: AsyncClient, db: Session, normal_user: UserCreate
+    client: AsyncClient, normal_user: UserCreate
 ) -> dict[str, str]:
     return await user_authentication_headers(
         client=client, email=normal_user.email, password=normal_user.password

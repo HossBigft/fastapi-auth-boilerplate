@@ -1,16 +1,12 @@
 import uuid
 
 from typing import Any
-from fastapi import APIRouter,  HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy import update, delete, select, func
 
 
 from app.db import crud
-from app.core.dependencies import (
-    CurrentUser,
-    SessionDep,
-    get_current_active_superuser
-)
+from app.core.dependencies import CurrentUser, SessionDep, get_current_active_superuser
 from app.core.security import get_password_hash, verify_password
 from app.schemas import (
     Message,
@@ -47,7 +43,9 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     return UsersPublic(data=users, count=count)
 
 
-@router.post("/",    dependencies=[Depends(get_current_active_superuser)], response_model=UserPublic)
+@router.post(
+    "/", dependencies=[Depends(get_current_active_superuser)], response_model=UserPublic
+)
 def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
     """
     Create new user.
@@ -131,6 +129,10 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     """
     Delete own user.
     """
+    if current_user.is_superuser:
+        raise HTTPException(
+            status_code=403, detail="Super users are not allowed to delete themselves"
+        )
     stmt = delete(User).where(User.id == current_user.id)
     session.execute(stmt)
     session.commit()
@@ -153,7 +155,10 @@ def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     return user
 
 
-@router.get("/{user_id}", response_model=UserPublic)
+@router.get(
+    "/{user_id}",
+    response_model=UserPublic,
+)
 def read_user_by_id(
     user_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
 ) -> Any:
@@ -166,13 +171,17 @@ def read_user_by_id(
         user = UserPublic.model_validate(user)
     if user == current_user:
         return user
-
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403,
+            detail="The user doesn't have enough privileges",
+        )
     return user
 
 
 @router.patch(
     "/{user_id}",
-        dependencies=[Depends(get_current_active_superuser)],
+    dependencies=[Depends(get_current_active_superuser)],
     response_model=UserPublic,
 )
 def update_user(
@@ -224,6 +233,3 @@ def delete_user(
     session.execute(stmt_delete)
     session.commit()
     return Message(message="User deleted successfully")
-
-
-

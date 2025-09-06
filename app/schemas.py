@@ -23,6 +23,7 @@ class UserBase(BaseModel):
 
     email: EmailStr = Field(max_length=255)
     is_active: bool = True
+    is_superuser: bool = False
     full_name: str | None = Field(default=None, max_length=255)
 
 

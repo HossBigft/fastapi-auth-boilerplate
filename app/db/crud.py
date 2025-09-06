@@ -16,6 +16,7 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
         email=user_create.email,
         is_active=True,
         full_name=user_create.full_name,
+        is_superuser=user_create.is_superuser,
         hashed_password=get_password_hash(user_create.password),
     )
     session.add(db_obj)
