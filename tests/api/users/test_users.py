@@ -27,24 +27,21 @@ async def test_get_users_superuser_me(
 
 @pytest.mark.asyncio
 async def test_get_users_normal_user_me(
-    client: AsyncClient, normal_user_token_headers: dict[str, str]
+    client: AsyncClient,
+    normal_user_token_headers: dict[str, str],
+    normal_user: UserCreate,
 ) -> None:
     r = await client.get("/users/me", headers=normal_user_token_headers)
     current_user = r.json()
     assert current_user
     assert current_user["is_active"] is True
-    assert current_user["email"] == settings.EMAIL_TEST_USER
+    assert current_user["email"] == normal_user.email
 
 
 @pytest.mark.asyncio
 async def test_create_user_new_email(
     client: AsyncClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
-    with (
-        patch("app.core_utils.send_email", return_value=None),
-        patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
-        patch("app.core.config.settings.SMTP_USER", "admin@example.com"),
-    ):
         username = random_email()
         password = random_lower_string()
         data = {"email": username, "password": password}

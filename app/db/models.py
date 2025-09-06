@@ -4,8 +4,6 @@ from sqlalchemy import String, UUID, Boolean
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
-
-
 class Base(DeclarativeBase):
     pass
 
@@ -23,4 +21,3 @@ class User(Base):
         String(255), unique=True, index=True, nullable=False
     )
     hashed_password: Mapped[str] = mapped_column(String, nullable=False)
-

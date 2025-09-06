@@ -47,7 +47,7 @@ def get_current_user(session: SessionDep, token: TokenDep) -> UserPublic:
             detail="Could not validate credentials",
         )
 
-    user = session.get(app.db.models.User, token_data.sub)
+    user = session.get(User, token_data.sub)
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
